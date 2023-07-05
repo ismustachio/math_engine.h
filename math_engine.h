@@ -10,58 +10,41 @@ static float radians_to_degrees(float rad) {
 	return rad * (180.0 / M_PI);
 }
 
-typedef struct rgb rgb;
-struct rgb { float c[3]; };
+typedef struct rgb_t rgb_t;
+struct rgb_t { float c[3]; };
+extern rgb_t rgb_create(float r, float g, float b);
+extern rgb_t rgb_from_array_create(float vals[3]);
+extern rgb_t rgb_from_rgb_create(rgb_t c);
+extern void rgb_initialize(rgb_t* rgb, float r, float g, float b);
+extern rgb_t rgb_add(rgb_t v, rgb_t q);
+extern rgb_t rgb_subtract(rgb_t v, rgb_t q);
+extern rgb_t rgb_multiply(rgb_t v, rgb_t q);
+extern rgb_t rgb_scale(rgb_t v, float s);
+extern rgb_t rgb_divide(rgb_t v, float s);
 
-typedef struct rgba rgba;
-struct rgba { float c[4]; };
+typedef struct rgba_t rgba_t;
+struct rgba_t { float c[4]; };
+extern rgba_t rgba_create(float r, float g, float b, float a);
+extern rgba_t rgba_from_array_create(float vals[4]);
+extern rgba_t rgba_from_rgb_create(rgba_t c);
+extern void rgba_initialize(rgba_t* rgba, float r, float g, float b, float a);
+extern rgba_t rgba_add(rgba_t v, rgba_t q);
+extern rgba_t rgba_subtract(rgba_t v, rgba_t q);
+extern rgba_t rgba_multiply(rgba_t v, rgba_t q);
+extern rgba_t rgba_scale(rgba_t v, float s);
+extern rgba_t rgba_divide(rgba_t v, float s);
 
-#define create_color(T, ...) T ## _init(__VA_ARGS__)
-#define C(color, i) ((color).n[i])
-#define R(color) ((color).c[0])
-#define G(color) ((color).c[1])
-#define B(color) ((color).c[2])
-#define A(color) ((color).c[3])
 
-static rgb rgb_init(float r, float g, float b) {
-  rgb result = { { r, g, b } };
+typedef struct vec2f_t vec2f_t;
+struct vec2f_t { float n[2]; };
 
-  return result;
-}
-
-static rgb rgb_add(rgb v, rgb q) {
-  return create_color(rgb, R(v) + R(q), G(v) + G(q), B(v) + B(q));
-}
-
-static rgb rgb_subtract(rgb v, rgb q) {
-  return create_color(rgb, R(v) - R(q), G(v) - G(q), B(v) - B(q));
-}
-
-static rgb rgb_mult(rgb v, rgb q) {
-  return create_color(rgb, R(v) * R(q), G(v) * G(q), B(v) * B(q));
-}
-
-static rgb rgb_scale(rgb v, float s) {
-  return create_color(rgb, R(v) * s, G(v) * s, B(v) * s);
-}
-
-static rgb rgb_divide(rgb v, float s) {
-  s = 1.0 / s;
-  return create_color(rgb, R(v) * s, G(v) * s, B(v) * s);
-}
-
-typedef struct vector2 vector2;
-struct vector2 { float n[2]; };
-
-typedef struct vector3 vector3;
-struct vector3 { float n[3]; };
+typedef struct vec3f_t vec3f_t;
+struct vec3f_t { float n[3]; };
 
 typedef struct vector4 vector4;
 struct vector4 { float n[4]; };
 
 
-#define create_vector(T, ...) T ## _init(__VA_ARGS__)
-#define V(vector, i) ((vector).n[i])
 #define X(vector) ((vector).n[0])
 #define Y(vector) ((vector).n[1])
 #define Z(vector) ((vector).n[2])
@@ -69,56 +52,64 @@ struct vector4 { float n[4]; };
 
 
 // Vector2
-
-static vector2 vector2_init(float x, float y) {
-	vector2 result = { .n = {x, y}, };
+static vec2f_t vec2f_create(float x, float y) {
+	vec2f_t result = { .n = {x, y}, };
 
 	return result;
 }
 
-static vector2 vector2_scale_add(vector2 v, float s) {
-	vector2 result = { .n = { X(v) + s, Y(v) + s }, };
+static void vec2f_initialize(vec2f_t *v, float x, float y) {
+	v->n[0] = x;
+	v->n[1] = y;
+}
+
+static float vec2f_at(vec2f_t v, int i) {
+	return v.n[i];
+}
+
+static vec2f_t vec2f_scale_add(vec2f_t v, float s) {
+	vec2f_t result = { .n = { X(v) + s, Y(v) + s }, };
 
 	return result;		
 }
 
-static vector2 vector2_add(vector2 v, vector2 q) {
-	vector2 result = { .n = { X(v) + X(q), Y(v) + Y(q)}, };
+static vec2f_t vec2f_add(vec2f_t v, vec2f_t q) {
+	vec2f_t result = { .n = { X(v) + X(q), Y(v) + Y(q)}, };
 
 	return result;	
 }
 
-static vector2 vector2_subtract(vector2 v, vector2 q) {
-	vector2 result = { .n = { X(v) - X(q), Y(v) - Y(q) }, };
+static vec2f_t vec2f_subtract(vec2f_t v, vec2f_t q) {
+	vec2f_t result = { .n = { X(v) - X(q), Y(v) - Y(q) }, };
 
 	return result;
 }
 
-static vector2 vector2_scale_subtract(vector2 v, float s) {
-	vector2 result = { .n = { X(v) - s, Y(v) - s }, };
+static vec2f_t vec2f_scale_subtract(vec2f_t v, float s) {
+	vec2f_t result = { .n = { X(v) - s, Y(v) - s }, };
 
 	return result;		
 }
 
-static vector2 vector2_scale(vector2 v, float s) {
-	vector2 result = { .n = { X(v) * s, Y(v) * s }, };
+static vec2f_t vec2f_scale(vec2f_t v, float s) {
+	vec2f_t result = { .n = { X(v) * s, Y(v) * s }, };
 
 	return result;		
 }
 
-static vector2 vector2_divide(vector2 v, float s) {
-	return vector2_scale(v, 1.0 / s);
+static vec2f_t vec2f_divide(vec2f_t v, float s) {
+	return vec2f_scale(v, 1.0 / s);
 }
 
-static float vector2_length(vector2 v) {
+static float vec2f_length(vec2f_t v) {
   return sqrt(X(v) * X(v) + Y(v) * Y(v));
 }
 
-static vector2 vector2_normalize(vector2 v) {
-	return vector2_scale(v, 1.0 / vector2_length(v));
+static vec2f_t vec2f_normalize(vec2f_t v) {
+	return vec2f_scale(v, 1.0 / vector2_length(v));
 }
 
-static float vector2_dot(vector2 v, vector2 q) {
+static float vec2f_dot(vec2f_t v, vec2f_t q) {
 	return X(v) * X(q) + Y(v) * Y(q);
 }
 
@@ -128,69 +119,74 @@ static float vector2_dot(vector2 v, vector2 q) {
 
 
 // Vector3
-
-static vector3 vector3_init(float x, float y, float z) {
-	vector3 result = { .n = {x, y, z},};
-
-	return result;
-}
-
-static vector3 vector3_scale_add(vector3 v, float s) {
-	vector3 result = { .n = { X(v) + s, Y(v) + s, Z(v) + s }, };
-
-	return result;		
-}
-
-static vector3 vector3_add(vector3 v, vector3 q) {
-	vector3 result = { .n = { X(v) + X(q), Y(v) + Y(q), Z(v) + Z(q) }, };
-
-	return result;	
-}
-
-static vector3 vector3_subtract(vector3 v, vector3 q) {
-	vector3 result = { .n = { X(v) - X(q), Y(v) - Y(q), Z(v) - Z(q) }, };
-
-	return result;	
-}
-
-static vector3 vector3_scale_subtract(vector3 v, float s) {
-	vector3 result = { .n = { X(v) - s, Y(v) - s, Z(v) - s }, };
+static vec3f_t vec3f_create(float x, float y, float z) {
+	vec3f_t result = { .n = {x, y, z},};
 
 	return result;
 }
 
-static vector3 vector3_scale(vector3 v, float s) {
-	vector3 result = { .n = { X(v) * s, Y(v) * s, Z(v) * s }, };
+static void vec3f_initialize(vec3f_t* v, float x, float y, float z) {
+	v->n[0] = x;
+	v->n[1] = y;
+	v->n[2] = z;
+}
+
+static vec3f_t vec3f_scale_add(vec3f_t v, float s) {
+	vec3f_t result = { .n = { X(v) + s, Y(v) + s, Z(v) + s }, };
 
 	return result;		
 }
 
-static vector3 vector3_divide(vector3 v, float s) {
-	return vector3_scale(v, 1.0 / s);
+static vec3f_t vec3f_add(vec3f_t v, vec3f_t q) {
+	vec3f_t result = { .n = { X(v) + X(q), Y(v) + Y(q), Z(v) + Z(q) }, };
+
+	return result;	
 }
 
-static float vector3_length(vector3 v) {
+static vec3f_t vec3f_subtract(vec3f_t v, vec3f_t q) {
+	vec3f_t result = { .n = { X(v) - X(q), Y(v) - Y(q), Z(v) - Z(q) }, };
+
+	return result;	
+}
+
+static vec3f_t vec3f_scale_subtract(vec3f_t v, float s) {
+	vec3f_t result = { .n = { X(v) - s, Y(v) - s, Z(v) - s }, };
+
+	return result;
+}
+
+static vec3f_t vec3f_scale(vec3f_t v, float s) {
+	vec3f_t result = { .n = { X(v) * s, Y(v) * s, Z(v) * s }, };
+
+	return result;		
+}
+
+static vec3f_t vec3f_divide(vec3f_t v, float s) {
+	return vec3f_scale(v, 1.0 / s);
+}
+
+static float vec3f_length(vec3f_t v) {
 	return sqrt(X(v) * X(v) + Y(v) * Y(v) + Z(v) * Z(v));
 }
 
-static vector3 vector3_cross(vector3 v, vector3 q) {
-	return create_vector(vector3,
+static vec3f_t vec3f_cross(vec3f_t v, vec3f_t q) {
+	return ve3f_create(
 			     Y(v) * Z(q) - Z(v) * Y(q),
 			     Z(v) * X(q) - X(v) * Z(q),
 			     X(v) * Y(q) - Y(v) * X(q));
 }
 
-static vector3 vector3_normalize(vector3 v) {
-	return vector3_scale(v, 1.0 / vector3_length(v));
+static vec3f_t vec3f_normalize(vec3f_t v) {
+	return vec3f_scale(v, 1.0 / vec3f_length(v));
 }
 
 
-static float vector3_dot(vector3 v, vector3 q) {
+static float vec3f_dot(vec3f_t v, vec3f_t q) {
 	return X(v) * X(q) + Y(v) * Y(q) + Z(v) * Z(q);
 }
 
-static vector3 vector3_negate(vector3 v) {
-	return create_vector(vector3, -v.n[0], -v.n[1], -v.n[2]);
+static vec3f_t vec3f_negate(vec3f_t v) {
+	return vec3f_create(vec3f_t, -v.n[0], -v.n[1], -v.n[2]);
 }
 
 
@@ -476,11 +472,11 @@ static matrix4 matrix4_perspective(float fov, float aspect_ratio, float near, fl
 			     0.0, 0.0, -1.0, 0.0);
 }
 
-static matrix4 matrix4_look_at(vector3 position, vector3 target, vector3 up) {
+static matrix4 matrix4_look_at(vec3f_t position, vec3f_t target, vec3f_t up) {
 	
-	vector3 forward = vector3_normalize(vector3_subtract(target, position));
-	vector3 right = vector3_normalize(vector3_cross(forward, vector3_normalize(up)));
-	vector3 upn = vector3_cross(right, forward);
+	vec3f_t forward = vector3_normalize(vector3_subtract(target, position));
+	vec3f_t right = vector3_normalize(vector3_cross(forward, vector3_normalize(up)));
+	vec3f_t upn = vector3_cross(right, forward);
 
 	return create_matrix(matrix4, X(right), Y(right), Z(right), -vector3_dot(right, position),
 			     X(upn), Y(upn), Z(upn), -vector3_dot(upn, position),
